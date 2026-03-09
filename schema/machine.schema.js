@@ -1,7 +1,6 @@
 const { Schema, model, Types } = require("mongoose");
 
 const Machine = new Schema({
-    // Mashina nomi (Rasmda: Tahoe, Damas Van, Nexia)
     name: { 
         type: String, 
         required: [true, "Mashina nomi kiritilishi shart"], 
