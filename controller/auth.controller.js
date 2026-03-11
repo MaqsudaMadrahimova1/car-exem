@@ -2,6 +2,7 @@ const CustomErrorHandler = require("../error/custom-error.handler");
 const AuthSchema = require("../schema/auth.schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const sendMessage = require("../utils/send-email");
 
 const register = async (req, res, next) => {
     try {
@@ -22,6 +23,7 @@ const register = async (req, res, next) => {
             otp: code,
             otpTime: Date.now() + 120000 
         });
+        await sendMessage(code,email)
 
         res.status(201).json({
             message: "User registered. Please verify your email.",
