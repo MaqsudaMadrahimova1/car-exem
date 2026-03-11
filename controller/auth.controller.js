@@ -3,7 +3,7 @@ const AuthSchema = require("../schema/auth.schema")
 const bcrypt = require("bcrypt");
 
 
-const register = async (req,res) => {
+const register = async (req,res,next) => {
     try{
         const {username,email,password}=req.body
         const foundedUser = await AuthSchema.findOne({email})
@@ -29,7 +29,7 @@ const register = async (req,res) => {
     next(error); 
 }
 };
-const verify = async (req, res) => {
+const verify = async (req, res,next) => {
     try {
         const { email, otp } = req.body;
         const user = await AuthSchema.findOne({ email });
@@ -56,7 +56,7 @@ const verify = async (req, res) => {
     }
 };
 
-const updateProfile = async (req, res) => {
+const updateProfile = async (req, res,next) => {
     try {
         const { username, email } = req.body;
         const userId = req.user.id; 

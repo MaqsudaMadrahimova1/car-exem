@@ -1,7 +1,7 @@
 const Category = require("../schema/category.schema");
 const CustomErrorHandler = require("../error/custom-error.handler");
 
-exports.createCategory = async (req, res) => {
+const createCategory = async (req, res,next) => {
     try {
         const { modelName, image } = req.body;
         const existing = await Category.findOne({ modelName });
@@ -24,7 +24,7 @@ exports.createCategory = async (req, res) => {
     }
 };
 
-exports.getAllCategories = async (req, res) => {
+const getAllCategories = async (req, res,next) => {
     try {
         const categories = await Category.find().populate("addedBy", "username email");
         res.status(200).json(categories);
@@ -32,8 +32,7 @@ exports.getAllCategories = async (req, res) => {
         next(error);
     }
 };
-
-exports.getMyCategories = async (req, res, next) => {
+const getMyCategories = async (req, res, next) => {
     try {
         const myCategories = await Category.find({ addedBy: req.user.id });
         res.status(200).json(myCategories);
@@ -41,7 +40,7 @@ exports.getMyCategories = async (req, res, next) => {
         next(error);
     }
 };
-exports.deleteCategory = async (req, res, next) => {
+const deleteCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
         const deleted = await Category.findByIdAndDelete(id);
@@ -55,3 +54,9 @@ exports.deleteCategory = async (req, res, next) => {
         next(error);
     }
 };
+module.exports = {
+    createCategory,
+    getAllCategories,
+    getMyCategories,
+    deleteCategory
+}
