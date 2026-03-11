@@ -26,6 +26,10 @@ const Auth = new Schema({
         enum: ["user", "admin"], 
         default: "user" 
     },
+    isVerified: { 
+        type: Boolean,
+        default: false 
+    },
 
     otp: { 
         type: String, 

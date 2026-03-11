@@ -5,4 +5,4 @@ const profileUpdateSchema = Joi.object({
     bio: Joi.string().max(200).optional()
 });
 
-module.exports = { profileUpdateSchema };
+module.exports =  profileUpdateSchema ;

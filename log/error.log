@@ -1,0 +1,16 @@
+{
+  "level": "error",
+  "message": "Foydalanuvchi allaqachon ro'yxatdan o'tgan",
+  "status": 400,
+  "method": "POST",
+  "url": "/api/auth/register",
+  "timestamp": "2026-03-11 10:45:12"
+}
+{
+  "level": "error",
+  "message": "Token topilmadi yoki login qilinmagan",
+  "status": 401,
+  "method": "GET",
+  "url": "/api/machine",
+  "timestamp": "2026-03-11 11:02:05"
+}

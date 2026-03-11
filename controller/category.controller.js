@@ -5,6 +5,9 @@ const createCategory = async (req, res,next) => {
     try {
         const { modelName, image } = req.body;
         const existing = await Category.findOne({ modelName });
+        if (req.user.role !== 'admin') {
+            return next(CustomErrorHandler.Forbidden("only admin create category"));
+        }
         if (existing) {
             return next(CustomErrorHandler.BadRequest(""));
         }
@@ -40,6 +43,40 @@ const getMyCategories = async (req, res, next) => {
         next(error);
     }
 };
+const updateCategory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { modelName, image } = req.body;
+        if (req.user.role !== 'admin') {
+            return next(CustomErrorHandler.Forbidden("Faqat admin o'zgartira oladi"));
+        }
+
+        const updated = await Category.findByIdAndUpdate(
+            id, 
+            { modelName, image }, 
+            { new: true, runValidators: true }
+        );
+
+        if (!updated) {
+            return next(CustomErrorHandler.NotFound("Kategoriya topilmadi"));
+        }
+
+        res.status(200).json({ message: "Yangilandi", data: updated });
+    } catch (error) {
+        next(error);
+    }
+};
+const getCategoryById = async (req, res, next) => {
+    try {
+        const category = await Category.findById(req.params.id).populate("addedBy", "username");
+        if (!category) {
+            return next(CustomErrorHandler.NotFound("Kategoriya topilmadi"));
+        }
+        res.status(200).json(category);
+    } catch (error) {
+        next(error);
+    }
+};
 const deleteCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -58,5 +95,7 @@ module.exports = {
     createCategory,
     getAllCategories,
     getMyCategories,
+    updateCategory,
+    getCategoryById,
     deleteCategory
 }
