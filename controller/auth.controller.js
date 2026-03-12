@@ -3,15 +3,12 @@ const AuthSchema = require("../schema/auth.schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sendMessage = require("../utils/send-email");
-
 const register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
         const foundedUser = await AuthSchema.findOne({ email });
 
-        if (foundedUser) {
-            return next(CustomErrorHandler.BadRequest("User already exists"));
-        }
+        if (foundedUser) return next(CustomErrorHandler.BadRequest("User already exists"));
 
         const hashPassword = await bcrypt.hash(password, 12);
         const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -23,7 +20,8 @@ const register = async (req, res, next) => {
             otp: code,
             otpTime: Date.now() + 120000 
         });
-        await sendMessage(code,email)
+
+        await sendMessage(code, email);
 
         res.status(201).json({
             message: "User registered. Please verify your email.",
@@ -33,7 +31,6 @@ const register = async (req, res, next) => {
         next(error);
     }
 };
-
 const verify = async (req, res, next) => {
     try {
         const { email, otp } = req.body;
@@ -57,6 +54,7 @@ const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const user = await AuthSchema.findOne({ email });
+        
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return next(CustomErrorHandler.BadRequest("Email yoki parol noto'g'ri"));
         }
@@ -70,52 +68,15 @@ const login = async (req, res, next) => {
     }
 };
 
-const refreshToken = async (req, res, next) => {
-    try {
-        const { token } = req.body;
-        if (!token) return next(CustomErrorHandler.Unauthorized("Token topilmadi"));
-
-        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-        const accessToken = jwt.sign({ id: decoded.id }, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
-
-        res.status(200).json({ accessToken });
-    } catch (error) {
-        next(CustomErrorHandler.Unauthorized("Token yaroqsiz"));
-    }
-};
-
-const logout = async (req, res, next) => {
-    try {
-        res.status(200).json({ message: "Logout successful" });
-    } catch (error) {
-        next(error);
-    }
-};
-
-const changePassword = async (req, res, next) => {
-    try {
-        const { oldPassword, newPassword } = req.body;
-        const user = await AuthSchema.findById(req.user.id);
-
-        const isMatch = await bcrypt.compare(oldPassword, user.password);
-        if (!isMatch) return next(CustomErrorHandler.BadRequest("Eski parol xato"));
-
-        user.password = await bcrypt.hash(newPassword, 12);
-        await user.save();
-
-        res.status(200).json({ message: "Password updated" });
-    } catch (error) {
-        next(error);
-    }
-};
-
 const forgotPassword = async (req, res, next) => {
     try {
-        const { email, newPassword } = req.body;
+        const { email, otp, newPassword } = req.body;
         const user = await AuthSchema.findOne({ email });
         if (!user) return next(CustomErrorHandler.NotFound("User topilmadi"));
+        if (user.otp !== otp) return next(CustomErrorHandler.BadRequest("Kod xato"));
 
         user.password = await bcrypt.hash(newPassword, 12);
+        user.otp = null; 
         await user.save();
 
         res.status(200).json({ message: "Password reset successful" });
@@ -123,10 +84,14 @@ const forgotPassword = async (req, res, next) => {
         next(error);
     }
 };
+
 const getProfile = async (req, res, next) => {
     try {
         const user = await AuthSchema.findById(req.user.id).select("-password");
+        if (!user) return next(CustomErrorHandler.NotFound("User topilmadi"));
+
         let data = { user };
+
         if (user.role === 'admin') {
             const Machine = require("../schema/machine.schema");
             const Category = require("../schema/category.schema");
@@ -134,35 +99,15 @@ const getProfile = async (req, res, next) => {
             data.myMachines = await Machine.find({ addedBy: user._id });
             data.myCategories = await Category.find({ addedBy: user._id });
         }
+
         res.status(200).json(data);
     } catch (error) {
         next(error);
     }
 };
 
-const updateProfile = async (req, res, next) => {
-    try {
-        const { username, email } = req.body;
-        const updatedUser = await AuthSchema.findByIdAndUpdate(
-            req.user.id,
-            { username, email },
-            { new: true, runValidators: true }
-        ).select("-password -otp -otpTime");
-
-        res.status(200).json({ message: "Update profile", user: updatedUser });
-    } catch (error) {
-        next(error);
-    }
-};
-
 module.exports = { 
-    register,
-     verify, 
-     login, 
-     logout, 
-    refreshToken, 
-    changePassword, 
-    forgotPassword,
-    getProfile,
-    updateProfile
+    register, verify, login, logout, 
+    refreshToken, changePassword, 
+    forgotPassword, getProfile, updateProfile
 };
