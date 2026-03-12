@@ -81,4 +81,6 @@ async function sendMessage(code, email) {
     }
 }
 
-module.exports = sendMessage;
+module.exports = {
+    sendMessage
+};

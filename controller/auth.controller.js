@@ -2,7 +2,7 @@ const CustomErrorHandler = require("../error/custom-error.handler");
 const AuthSchema = require("../schema/auth.schema");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const sendMessage = require("../utils/send-email");
+
 const register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
@@ -21,7 +21,7 @@ const register = async (req, res, next) => {
             otpTime: Date.now() + 120000 
         });
 
-        await sendMessage(code, email);
+ await sendMessage(code,email);
 
         res.status(201).json({
             message: "User registered. Please verify your email.",
@@ -109,5 +109,5 @@ const getProfile = async (req, res, next) => {
 module.exports = { 
     register, verify, login, logout, 
     refreshToken, changePassword, 
-    forgotPassword, getProfile, updateProfile
+    forgotPassword, getProfile, updatePro
 };

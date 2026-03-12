@@ -19,7 +19,7 @@ const createCategory = async (req, res,next) => {
         });
 
         res.status(201).json({
-            message: "Category add",
+            message: "Category added",
             data: newCategory
         });
     } catch (error) {
@@ -48,7 +48,7 @@ const updateCategory = async (req, res, next) => {
         const { id } = req.params;
         const { modelName, image } = req.body;
         if (req.user.role !== 'admin') {
-            return next(CustomErrorHandler.Forbidden("Faqat admin o'zgartira oladi"));
+            return next(CustomErrorHandler.Forbidden("Only update admin"));
         }
 
         const updated = await Category.findByIdAndUpdate(
@@ -58,10 +58,10 @@ const updateCategory = async (req, res, next) => {
         );
 
         if (!updated) {
-            return next(CustomErrorHandler.NotFound("Kategoriya topilmadi"));
+            return next(CustomErrorHandler.NotFound("Category not found"));
         }
 
-        res.status(200).json({ message: "Yangilandi", data: updated });
+        res.status(200).json({ message: "Update", data: updated });
     } catch (error) {
         next(error);
     }
@@ -70,7 +70,7 @@ const getCategoryById = async (req, res, next) => {
     try {
         const category = await Category.findById(req.params.id).populate("addedBy", "username");
         if (!category) {
-            return next(CustomErrorHandler.NotFound("Kategoriya topilmadi"));
+            return next(CustomErrorHandler.NotFound("Category not found"));
         }
         res.status(200).json(category);
     } catch (error) {
