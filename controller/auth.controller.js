@@ -21,8 +21,8 @@ const register = async (req, res, next) => {
             otpTime: Date.now() + 120000 
         });
 
- await sendMessage(code,email);
-
+ await sendMessage(code,email)
+;
         res.status(201).json({
             message: "User registered. Please verify your email.",
             otp: code 
@@ -54,11 +54,11 @@ const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         const user = await AuthSchema.findOne({ email });
-        
         if (!user || !(await bcrypt.compare(password, user.password))) {
+            const logger = require("../utils/logger"); 
+            logger.warn(`Muvaffaqiyatsiz kirish urunishi: ${email} manzili orqali xato parol kiritildi.`);
             return next(CustomErrorHandler.BadRequest("Email yoki parol noto'g'ri"));
         }
-
         const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_ACCESS_SECRET, { expiresIn: "15m" });
         const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 

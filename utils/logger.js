@@ -10,23 +10,23 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.File({ 
-      filename: "logs/error.log", 
+      filename: "log/error.log", 
       level: "error" 
     }),
 
     new winston.transports.File({ 
-      filename: "logs/warning.log", 
+      filename: "log/warning.log", 
       level: "warn" 
     }),
 
     new winston.transports.File({ 
-      filename: "logs/combined.log" 
+      filename: "log/combined.log" 
     }),
 
     new winston.transports.MongoDB({
       db: process.env.MONGO_URL,
       options: { useUnifiedTopology: true },
-      collection: "logs", 
+      collection: "log", 
       level: "info",
     }),
     new winston.transports.Console({
